@@ -38,7 +38,7 @@ def convert_rgb_to_ycbcr(rgb_img):
     Ycbcr[:,:,1]+=128
     Ycbcr[:,:,2]+=128
     Ycbcr = np.uint8(np.round(Ycbcr))
-    print("Ycbcr",Ycbcr)
+    print("Ycbcr",Ycbcr.shape)
     
     img = Ycbcr
     
@@ -49,7 +49,32 @@ def convert_ycbcr_to_rgb(ycbcr_img):
     """
     Transform the YCbCr image to a RGB image
     """
-    img = ...
+    ycbcr_img[:,:,1]-=128
+    ycbcr_img[:,:,2]-=128
+
+    rgb=[]
+    mat = np.array([[1.0, 0.0, 1.40210],
+                    [1.0,-0.34414,-0.71414],
+                    [1.0,1.77180,0.0]])
+    
+    for row in ycbcr_img:
+        temp_row=[]
+        for pixel in row:
+            rgb_pixel=[]
+
+            for row_in_mat in mat:
+                #print(np.sum(row_in_mat*pixel))
+                rgb_pixel.append(np.sum(row_in_mat*pixel))
+            temp_row.append(rgb_pixel)  
+            #print(temp_row)
+        rgb.append(temp_row)
+
+    rgb = np.array(rgb)
+    
+    rgb = np.uint8(np.round(rgb))
+    print("Ycbcr",rgb.shape)
+    
+    img = rgb
 
     return img
 
@@ -101,7 +126,7 @@ def part1_encoder():
 
     # TODO: Get size of input image (h, w, c)
     ###### Your code here ######
-    h, w, c = ...
+    h, w, c = img.shape
 
     # TODO: Compute number of blocks (of size 8-by-8), cast the numbers to int
 
