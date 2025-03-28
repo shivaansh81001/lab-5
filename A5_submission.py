@@ -28,7 +28,7 @@ def convert_rgb_to_ycbcr(rgb_img):
 
             for row_in_mat in mat:
                 #print(np.sum(row_in_mat*pixel))
-                ycbcr_pixel.append(np.sum(row_in_mat*pixel))
+                ycbcr_pixel.append(np.dot(row_in_mat,pixel))
             temp_row.append(ycbcr_pixel)  
             #print(temp_row)
         Ycbcr.append(temp_row)
@@ -37,7 +37,7 @@ def convert_rgb_to_ycbcr(rgb_img):
     
     Ycbcr[:,:,1]+=128
     Ycbcr[:,:,2]+=128
-    Ycbcr = np.uint8(np.round(Ycbcr))
+    #Ycbcr = np.uint8(Ycbcr)
     print("Ycbcr",Ycbcr.shape)
     
     img = Ycbcr
@@ -71,7 +71,7 @@ def convert_ycbcr_to_rgb(ycbcr_img):
 
     rgb = np.array(rgb)
     
-    rgb = np.uint8(np.round(rgb))
+    #rgb = np.uint8(rgb)
     print("Ycbcr",rgb.shape)
     
     img = rgb
@@ -144,9 +144,9 @@ def part1_encoder():
 
     # TODO: Copy the values of img into padded_img[0:h,0:w,:]
     ###### Your code here ######
-    for i in range(h):
-        for j in range(w):
-            padded_img[i,j]=img[i,j]
+    padded_img[0:h,0:w,:]=img[:,:,:]
+
+    print("dims of padded image",padded_img.shape)
 
     # TODO: Display padded image
     plt.imshow(np.uint8(padded_img))
@@ -162,10 +162,11 @@ def part1_encoder():
                                       [14,13,16,24,40,57,69,56],
                                       [14,17,22,29,51,87,80,62],
                                       [18,22,37,56,68,109,103,77],
+                                      [24,35,55,64,81,104,113,92],
                                       [49,64,78,87,103,121,120,101],
                                       [72,92,95,98,112,100,103,99]])# quantization table for Y channels
     
-    quantization_matrix_CbCr = np.array([[17, 18, 24, 47, 99, 99, 99, 99],
+    quantization_matrix_CbCr = np.array([[17,18,24,47,99,99,99,99],
                                         [18, 21, 26, 66, 99, 99, 99, 99],
                                         [24, 26, 56, 99, 99, 99, 99, 99],
                                         [47, 66, 99, 99, 99, 99, 99, 99],
@@ -176,7 +177,9 @@ def part1_encoder():
     ###### Your code here ######
 
     # TODO: Initialize variables for compression calculations (only for the Y channel)
-    ###### Your code here ######
+    before = 0
+    after = 0
+    total = 0
 
     # NOTE: Iterate over blocks
     for i in range(nbh):
@@ -192,37 +195,43 @@ def part1_encoder():
             col_ind_2 = col_ind_1 + block_size
             
             # TODO: Select current block to process using calculated indices (through slicing)
-            Yblock = ...###### Your code here ######
-            Cbblock = ...###### Your code here ######
-            Crblock = ...###### Your code here ######
+            Yblock = padded_img[row_ind_1:row_ind_2,col_ind_1:col_ind_2,0]###### Your code here ######
+            Cbblock = padded_img[row_ind_1:row_ind_2,col_ind_1:col_ind_2,1]###### Your code here ######
+            Crblock = padded_img[row_ind_1:row_ind_2,col_ind_1:col_ind_2,2]###### Your code here ######
             
             # TODO: Apply dct2d() to selected block             
-            YDCT = ...###### Your code here ######
-            CbDCT = ...###### Your code here ######
-            CrDCT = ...###### Your code here ######
+            YDCT = dct2D(Yblock) ###### Your code here ######
+            CbDCT = dct2D(Cbblock) ###### Your code here ######
+            CrDCT = dct2D(Crblock) ###### Your code here ######
 
             # TODO: Quantization
             # Divide each element of DCT block by corresponding element in quantization matrix
-            quantized_YDCT = ...###### Your code here ######
-            quantized_CbDCT = ...###### Your code here ######
-            quantized_CrDCT = ...###### Your code here ######
+            quantized_YDCT = np.round(YDCT/quantization_matrix_Y) ###### Your code here ######
+            quantized_CbDCT = np.round(CbDCT/quantization_matrix_CbCr) ###### Your code here ######
+            quantized_CrDCT = np.round(CrDCT/quantization_matrix_CbCr) ###### Your code here ######
 
             # TODO: Reorder DCT coefficients into block (use zigzag function)
-            reordered_Y = ...###### Your code here ######
-            reordered_Cb = ...###### Your code here ######
-            reordered_Cr = ...###### Your code here ######
+            reordered_Y = zigzag(quantized_YDCT) ###### Your code here ######
+            reordered_Cb = zigzag(quantized_CbDCT) ###### Your code here ######
+            reordered_Cr = zigzag(quantized_CrDCT) ###### Your code here ######
 
             # TODO: Reshape reordered array to 8-by-8 2D block
-            reshaped_Y = ...###### Your code here ######
-            reshaped_Cb = ...###### Your code here ######
-            reshaped_Cr = ...###### Your code here ######
+            reshaped_Y = reordered_Y.reshape((block_size,block_size)) ###### Your code here ######
+            reshaped_Cb = reordered_Cb.reshape((block_size,block_size)) ###### Your code here ######
+            reshaped_Cr = reordered_Cr.reshape((block_size,block_size)) ###### Your code here ######
 
             # TODO: Copy reshaped matrix into padded_img on current block corresponding indices
             ###### Your code here ######
-
+            padded_img[row_ind_1:row_ind_2,col_ind_1:col_ind_2,0] = reshaped_Y
+            padded_img[row_ind_1:row_ind_2,col_ind_1:col_ind_2,1] = reshaped_Cb
+            padded_img[row_ind_1:row_ind_2,col_ind_1:col_ind_2,2] = reshaped_Cr
             # TODO: Compute pixel locations with non-zero values before and after quantization (only in Y channel)
             # TODO: Compute total number of pixels
+            before += np.sum(YDCT==0) 
+            after += np.sum(quantized_YDCT==0)
+            total+= (block_size*block_size)
             ###### Your code here ####
+
 
     plt.imshow(np.uint8(padded_img))
     plt.title('encoded image')
@@ -230,8 +239,8 @@ def part1_encoder():
     plt.show()
 
     # TODO: Calculate percentage of pixel locations with non-zero values before and after to measure degree of compression 
-    before_compression = ... ###### Your code here ####
-    after_compression = ... ###### Your code here ####
+    before_compression =100-(((before)/(total))*100) ###### Your code here ####
+    after_compression = 100-(((after)/(total))*100) ###### Your code here ####
 
     # Print statements as shown in eClass
     print('Percentage of non-zero elements in Luma channel:')
