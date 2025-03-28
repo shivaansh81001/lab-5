@@ -57,16 +57,14 @@ def convert_ycbcr_to_rgb(ycbcr_img):
                     [1.0,-0.34414,-0.71414],
                     [1.0,1.77180,0.0]])
     
+    
     for row in ycbcr_img:
-        temp_row=[]
+        temp_row = []
         for pixel in row:
-            rgb_pixel=[]
-
+            rgb_pixel = []
             for row_in_mat in mat:
-                #print(np.sum(row_in_mat*pixel))
-                rgb_pixel.append(np.sum(row_in_mat*pixel))
-            temp_row.append(rgb_pixel)  
-            #print(temp_row)
+                rgb_pixel.append(np.dot(row_in_mat, pixel))
+            temp_row.append(rgb_pixel)
         rgb.append(temp_row)
 
     rgb = np.array(rgb)
@@ -336,9 +334,9 @@ def part2_decoder():
                 dequantized_CrDCT = Crreordered*quantization_matrix_CbCr ###### Your code here ######
                 
                 # TODO: Apply idct2d() to reordered matrix 
-                YIDCT = idct(dequantized_YDCT) ###### Your code here ######
-                CbIDCT = idct(dequantized_CbDCT) ###### Your code here ######
-                CrIDCT = idct(dequantized_CrDCT) ###### Your code here ######
+                YIDCT = idct2D(dequantized_YDCT) ###### Your code here ######
+                CbIDCT = idct2D(dequantized_CbDCT) ###### Your code here ######
+                CrIDCT = idct2D(dequantized_CrDCT) ###### Your code here ######
 
                 # TODO: Copy IDCT matrix into padded_img on current block corresponding indices
                 ###### Your code here ######
@@ -348,8 +346,6 @@ def part2_decoder():
 
     # TODO: Remove out-of-range values
     ###### Your code here ######
-    padded_img=np.clip(padded_img,0,255)
-    padded_img=padded_img.astype(np.uint8)
 
     plt.imshow(np.uint8(padded_img))
     plt.title('decoded padded image (YCbCr)')
@@ -365,11 +361,13 @@ def part2_decoder():
     plt.axis('off')
     plt.show()
     
+    #print(padded_img)
     # TODO: Convert the image from YCbCr to RGB
     decoded_img = convert_ycbcr_to_rgb(decoded_img)
-    
+    decoded_img=np.clip(decoded_img,0,255).astype(np.uint8)
     # TODO: Remove out-of-range values
     ###### Your code here ######
+    #print(decoded_img)
     
     plt.imshow(np.uint8(decoded_img))
     plt.title('decoded image (RGB)')
