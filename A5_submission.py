@@ -14,8 +14,34 @@ def convert_rgb_to_ycbcr(rgb_img):
     """
     Transform the RGB image to a YCbCr image
     """
-    img = ...
+    #print("rgb",rgb_img)
+    
+    Ycbcr=[]
+    mat = np.array([[0.299000,0.587000,0.114000],
+                    [-0.168736,-0.331264,0.500002],
+                    [0.500000,-0.418688,-0.081312]])
+    
+    for row in rgb_img:
+        temp_row=[]
+        for pixel in row:
+            ycbcr_pixel=[]
 
+            for row_in_mat in mat:
+                #print(np.sum(row_in_mat*pixel))
+                ycbcr_pixel.append(np.sum(row_in_mat*pixel))
+            temp_row.append(ycbcr_pixel)  
+            #print(temp_row)
+        Ycbcr.append(temp_row)
+
+    Ycbcr = np.array(Ycbcr)
+    
+    Ycbcr[:,:,1]+=128
+    Ycbcr[:,:,2]+=128
+    Ycbcr = np.uint8(np.round(Ycbcr))
+    print("Ycbcr",Ycbcr)
+    
+    img = Ycbcr
+    
     return img
 
 # TODO: Implement the function below
@@ -58,7 +84,7 @@ def part1_encoder():
 
     # TODO: Read image using skimage.io
     ###### Your code here ######
-    img = ...
+    img = io.imread("bird.jpg")
 
     plt.imshow(img)
     plt.title('input image (RGB)')
