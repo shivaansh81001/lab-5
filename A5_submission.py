@@ -84,7 +84,7 @@ def dct2D(input_img):
     Function to compute 2D Discrete Cosine Transform (DCT)
     """
     # Apply DCT with type 2 and 'ortho' norm parameters
-    result = dct(input_img,type=2,norm="ortho")
+    result = dct(dct(input_img,type=2,norm="ortho").T,type=2,norm="ortho")
 
     return result
 
@@ -94,7 +94,7 @@ def idct2D(input_dct):
     Function to compute 2D Inverse Discrete Cosine Transform (IDCT)
     """
     # Apply IDCT with type 2 and 'ortho' norm parameters
-    result = idct(input_dct,type=2,norm="ortho")
+    result = idct(idct(input_dct,type=2,norm="ortho").T,type=2,norm="ortho")
 
     return result
 
@@ -177,6 +177,8 @@ def part1_encoder():
     ###### Your code here ######
 
     # TODO: Initialize variables for compression calculations (only for the Y channel)
+    padded_img=np.clip(padded_img,0,255)
+
     before = 0
     after = 0
     total = 0
@@ -207,13 +209,13 @@ def part1_encoder():
             # TODO: Quantization
             # Divide each element of DCT block by corresponding element in quantization matrix
             quantized_YDCT = np.round(YDCT/quantization_matrix_Y) ###### Your code here ######
-            quantized_CbDCT = np.round(CbDCT/quantization_matrix_CbCr) ###### Your code here ######
-            quantized_CrDCT = np.round(CrDCT/quantization_matrix_CbCr) ###### Your code here ######
+            quantized_CbDCT= np.round(CbDCT/quantization_matrix_CbCr) ###### Your code here ######
+            quantized_CrDCT =np.round(CrDCT/quantization_matrix_CbCr) ###### Your code here ######
 
             # TODO: Reorder DCT coefficients into block (use zigzag function)
-            reordered_Y = zigzag(quantized_YDCT) ###### Your code here ######
-            reordered_Cb = zigzag(quantized_CbDCT) ###### Your code here ######
-            reordered_Cr = zigzag(quantized_CrDCT) ###### Your code here ######
+            reordered_Y =zigzag(quantized_YDCT) ###### Your code here ######
+            reordered_Cb= zigzag(quantized_CbDCT) ###### Your code here ######
+            reordered_Cr=zigzag(quantized_CrDCT) ###### Your code here ######
 
             # TODO: Reshape reordered array to 8-by-8 2D block
             reshaped_Y = reordered_Y.reshape((block_size,block_size)) ###### Your code here ######
@@ -262,24 +264,40 @@ def part2_decoder():
 
     # TODO: Load 'encoded.npy' into padded_img (using np.load() function)
     ###### Your code here ######
-    padded_img = ...
+    padded_img = np.load("encoded.npy")
 
     # TODO: Load h, w, c, block_size and padded_img from the size.txt file
     ###### Your code here ######
-    h, w, c, block_size = ...
+    h, w, c, block_size = map(int,np.loadtxt("size.txt"))
+    print("part 2 hwc",h,w,c,block_size)
 
     # TODO: 6. Get size of padded_img, cast to int if needed
     ###### Your code here ######
+    print("part 2 padded image size",padded_img.shape)
 
     # TODO: Create the quantization matrix (Same as before)
-    quantization_matrix_Y = ... # quantization table for the Y channel
-    quantization_matrix_CbCr = ... # quantization table for the Y channel
+    quantization_matrix_Y = np.array([[16,11,10,16,24,40,51,61],
+                                      [12,12,14,19,26,58,60,55],
+                                      [14,13,16,24,40,57,69,56],
+                                      [14,17,22,29,51,87,80,62],
+                                      [18,22,37,56,68,109,103,77],
+                                      [24,35,55,64,81,104,113,92],
+                                      [49,64,78,87,103,121,120,101],
+                                      [72,92,95,98,112,100,103,99]]) # quantization table for the Y channel
+    quantization_matrix_CbCr = np.array([[17,18,24,47,99,99,99,99],
+                                        [18, 21, 26, 66, 99, 99, 99, 99],
+                                        [24, 26, 56, 99, 99, 99, 99, 99],
+                                        [47, 66, 99, 99, 99, 99, 99, 99],
+                                        [99, 99, 99, 99, 99, 99, 99, 99],
+                                        [99, 99, 99, 99, 99, 99, 99, 99],
+                                        [99, 99, 99, 99, 99, 99, 99, 99],
+                                        [99, 99, 99, 99, 99, 99, 99, 99]]) # quantization table for the Y channel
     
     ###### Your code here ######
 
     # TODO: Compute number of blocks (of size 8-by-8), cast to int
-    nbh = ... ###### Your code here ###### # (number of blocks in height)
-    nbw = ... ###### Your code here ###### # (number of blocks in width)
+    nbh = h//block_size ###### Your code here ###### # (number of blocks in height)
+    nbw = w//block_size ###### Your code here ###### # (number of blocks in width)
 
     # TODO: iterate over blocks
     for i in range(nbh):
@@ -297,36 +315,41 @@ def part2_decoder():
                 col_ind_2 = col_ind_1 + block_size
                 
                 # TODO: Select current block to process using calculated indices
-                Yblock = ... ###### Your code here ######
-                Cbblock = ... ###### Your code here ######
-                Crblock = ... ###### Your code here ######
+                Yblock = padded_img[row_ind_1:row_ind_2,col_ind_1:col_ind_2,0] ###### Your code here ######
+                Cbblock = padded_img[row_ind_1:row_ind_2,col_ind_1:col_ind_2,1] ###### Your code here ######
+                Crblock = padded_img[row_ind_1:row_ind_2,col_ind_1:col_ind_2,2] ###### Your code here ######
                 
                 # TODO: Reshape 8-by-8 2D block to 1D array
-                Yreshaped = ... ###### Your code here ######
-                Cbreshaped = ... ###### Your code here ######
-                Crreshaped = ... ###### Your code here ######
+                Yreshaped = Yblock.reshape(-1) ###### Your code here ######
+                Cbreshaped = Cbblock.reshape(-1) ###### Your code here ######
+                Crreshaped = Crblock.reshape(-1) ###### Your code here ######
                 
                 # TODO: Reorder array into block (use inverse_zigzag function)
-                Yreordered = ... ###### Your code here ######
-                Cbreordered = ... ###### Your code here ######
-                Crreordered = ... ###### Your code here ######
+                Yreordered = inverse_zigzag(Yreshaped,block_size,block_size) ###### Your code here ######
+                Cbreordered = inverse_zigzag(Cbreshaped,block_size,block_size) ###### Your code here ######
+                Crreordered = inverse_zigzag(Crreshaped,block_size,block_size) ###### Your code here ######
                 
                 # TODO: De-quantization
                 # Multiply each element of reordered block by corresponding element in quantization matrix
-                dequantized_YDCT = ... ###### Your code here ######
-                dequantized_CbDCT = ... ###### Your code here ######
-                dequantized_CrDCT = ... ###### Your code here ######
+                dequantized_YDCT = Yreordered*quantization_matrix_Y ###### Your code here ######
+                dequantized_CbDCT = Cbreordered*quantization_matrix_CbCr ###### Your code here ######
+                dequantized_CrDCT = Crreordered*quantization_matrix_CbCr ###### Your code here ######
                 
                 # TODO: Apply idct2d() to reordered matrix 
-                YIDCT = ... ###### Your code here ######
-                CbIDCT = ... ###### Your code here ######
-                CrIDCT = ... ###### Your code here ######
+                YIDCT = idct(dequantized_YDCT) ###### Your code here ######
+                CbIDCT = idct(dequantized_CbDCT) ###### Your code here ######
+                CrIDCT = idct(dequantized_CrDCT) ###### Your code here ######
 
                 # TODO: Copy IDCT matrix into padded_img on current block corresponding indices
                 ###### Your code here ######
+                padded_img[row_ind_1:row_ind_2,col_ind_1:col_ind_2,0]=YIDCT
+                padded_img[row_ind_1:row_ind_2,col_ind_1:col_ind_2,1]=CbIDCT
+                padded_img[row_ind_1:row_ind_2,col_ind_1:col_ind_2,2]=CrIDCT
 
     # TODO: Remove out-of-range values
     ###### Your code here ######
+    padded_img=np.clip(padded_img,0,255)
+    padded_img=padded_img.astype(np.uint8)
 
     plt.imshow(np.uint8(padded_img))
     plt.title('decoded padded image (YCbCr)')
@@ -335,7 +358,7 @@ def part2_decoder():
 
     # TODO: Get original sized image from padded_img
     ###### Your code here ######
-    decoded_img = ...
+    decoded_img = padded_img[0:h,0:w,:]
 
     plt.imshow(np.uint8(decoded_img))
     plt.title('decoded padded image (YCbCr)')
