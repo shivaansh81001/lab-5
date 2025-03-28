@@ -84,7 +84,7 @@ def dct2D(input_img):
     Function to compute 2D Discrete Cosine Transform (DCT)
     """
     # Apply DCT with type 2 and 'ortho' norm parameters
-    result = ...
+    result = dct(input_img,type=2,norm="ortho")
 
     return result
 
@@ -94,7 +94,7 @@ def idct2D(input_dct):
     Function to compute 2D Inverse Discrete Cosine Transform (IDCT)
     """
     # Apply IDCT with type 2 and 'ortho' norm parameters
-    result = ...
+    result = idct(input_dct,type=2,norm="ortho")
 
     return result
 
@@ -130,19 +130,23 @@ def part1_encoder():
 
     # TODO: Compute number of blocks (of size 8-by-8), cast the numbers to int
 
-    nbh = ...###### Your code here ###### # (number of blocks in height)
-    nbw = ...###### Your code here ###### # (number of blocks in width)
+    nbh = h//block_size ###### Your code here ###### # (number of blocks in height)
+    nbw = w//block_size ###### Your code here ###### # (number of blocks in width)
 
+    print(nbh,nbw)
 
     # TODO: (If necessary) Pad the image, get size of padded image
-    H = ...###### Your code here ######  # height of padded image
-    W = ...###### Your code here ######  # width of padded image
-
+    H = h+((block_size-(h-(nbh*block_size)))%block_size)###### Your code here ######  # height of padded image
+    W = w+((block_size-(w-(nbw*block_size)))%block_size)###### Your code here ######  # width of padded image
+    print("new H,W after padding", H,W)
     # TODO: Create a numpy zero matrix with size of H,W,3 called padded img
-    padded_img = ...###### Your code here ######
+    padded_img = np.zeros((H,W,3))
 
     # TODO: Copy the values of img into padded_img[0:h,0:w,:]
     ###### Your code here ######
+    for i in range(h):
+        for j in range(w):
+            padded_img[i,j]=img[i,j]
 
     # TODO: Display padded image
     plt.imshow(np.uint8(padded_img))
@@ -153,8 +157,22 @@ def part1_encoder():
 
     # TODO: Create the quantization matrix
     # Refer to eClass for imformation on filling these matrices
-    quantization_matrix_Y = ...# quantization table for Y channels
-    quantization_matrix_CbCr = ...# quantization table for Cb and Cr channels
+    quantization_matrix_Y = np.array([[16,11,10,16,24,40,51,61],
+                                      [12,12,14,19,26,58,60,55],
+                                      [14,13,16,24,40,57,69,56],
+                                      [14,17,22,29,51,87,80,62],
+                                      [18,22,37,56,68,109,103,77],
+                                      [49,64,78,87,103,121,120,101],
+                                      [72,92,95,98,112,100,103,99]])# quantization table for Y channels
+    
+    quantization_matrix_CbCr = np.array([[17, 18, 24, 47, 99, 99, 99, 99],
+                                        [18, 21, 26, 66, 99, 99, 99, 99],
+                                        [24, 26, 56, 99, 99, 99, 99, 99],
+                                        [47, 66, 99, 99, 99, 99, 99, 99],
+                                        [99, 99, 99, 99, 99, 99, 99, 99],
+                                        [99, 99, 99, 99, 99, 99, 99, 99],
+                                        [99, 99, 99, 99, 99, 99, 99, 99],
+                                        [99, 99, 99, 99, 99, 99, 99, 99]])# quantization table for Cb and Cr channels
     ###### Your code here ######
 
     # TODO: Initialize variables for compression calculations (only for the Y channel)
