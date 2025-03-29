@@ -38,7 +38,7 @@ def convert_rgb_to_ycbcr(rgb_img):
     Ycbcr[:,:,1]+=128
     Ycbcr[:,:,2]+=128
     #Ycbcr = np.uint8(Ycbcr)
-    print("Ycbcr",Ycbcr.shape)
+    #print("Ycbcr",Ycbcr.shape)
     
     img = Ycbcr
     
@@ -61,16 +61,20 @@ def convert_ycbcr_to_rgb(ycbcr_img):
     for row in ycbcr_img:
         temp_row = []
         for pixel in row:
+
             rgb_pixel = []
+            #print(pixel)
             for row_in_mat in mat:
                 rgb_pixel.append(np.dot(row_in_mat, pixel))
+                #print(np.dot(row_in_mat, pixel))
             temp_row.append(rgb_pixel)
+
         rgb.append(temp_row)
 
     rgb = np.array(rgb)
     
     #rgb = np.uint8(rgb)
-    print("Ycbcr",rgb.shape)
+    #print("Ycbcr",rgb.shape)
     
     img = rgb
 
@@ -78,6 +82,7 @@ def convert_ycbcr_to_rgb(ycbcr_img):
 
 # TODO: Implement the function below
 def dct2D(input_img):
+
     """
     Function to compute 2D Discrete Cosine Transform (DCT)
     """
@@ -131,12 +136,12 @@ def part1_encoder():
     nbh = h//block_size ###### Your code here ###### # (number of blocks in height)
     nbw = w//block_size ###### Your code here ###### # (number of blocks in width)
 
-    print(nbh,nbw)
+    #print(nbh,nbw)
 
     # TODO: (If necessary) Pad the image, get size of padded image
     H = h+((block_size-(h-(nbh*block_size)))%block_size)###### Your code here ######  # height of padded image
     W = w+((block_size-(w-(nbw*block_size)))%block_size)###### Your code here ######  # width of padded image
-    print("new H,W after padding", H,W)
+    #print("new H,W after padding", H,W)
     # TODO: Create a numpy zero matrix with size of H,W,3 called padded img
     padded_img = np.zeros((H,W,3))
 
@@ -144,7 +149,7 @@ def part1_encoder():
     ###### Your code here ######
     padded_img[0:h,0:w,:]=img[:,:,:]
 
-    print("dims of padded image",padded_img.shape)
+    #print("dims of padded image",padded_img.shape)
 
     # TODO: Display padded image
     plt.imshow(np.uint8(padded_img))
@@ -267,11 +272,11 @@ def part2_decoder():
     # TODO: Load h, w, c, block_size and padded_img from the size.txt file
     ###### Your code here ######
     h, w, c, block_size = map(int,np.loadtxt("size.txt"))
-    print("part 2 hwc",h,w,c,block_size)
+    #print("part 2 hwc",h,w,c,block_size)
 
     # TODO: 6. Get size of padded_img, cast to int if needed
     ###### Your code here ######
-    print("part 2 padded image size",padded_img.shape)
+    #print("part 2 padded image size",padded_img.shape)
 
     # TODO: Create the quantization matrix (Same as before)
     quantization_matrix_Y = np.array([[16,11,10,16,24,40,51,61],
