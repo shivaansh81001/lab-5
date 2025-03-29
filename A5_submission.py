@@ -346,6 +346,7 @@ def part2_decoder():
 
     # TODO: Remove out-of-range values
     ###### Your code here ######
+    
 
     plt.imshow(np.uint8(padded_img))
     plt.title('decoded padded image (YCbCr)')
@@ -355,7 +356,7 @@ def part2_decoder():
     # TODO: Get original sized image from padded_img
     ###### Your code here ######
     decoded_img = padded_img[0:h,0:w,:]
-
+    
     plt.imshow(np.uint8(decoded_img))
     plt.title('decoded padded image (YCbCr)')
     plt.axis('off')
